@@ -14,16 +14,16 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-    favorite = db.relationship("favorite", back_populates="parent")
+    favorite = db.relationship("Favorite", backref="user")
 
 class Favorite(db.Model):
     __tablename__ = 'favorite'
     id = db.Column(db.Integer, primary_key=True)
-    user = db.relationship("user", back_populates="children")
+    planet = db.Column(db.Integer, ForeignKey("planet.id"), db.String(250), nullable=False)
+    character = db.Column(db.Integer, ForeignKey("planet.id"), db.String(250), nullable=False)
     user_id = db.Column(db.Integer, ForeignKey("user.id"))
-    # user = db.relationship("favorite", back_populates="children")
-    planet = db.Column(db.String(250), nullable=False)
-    character = db.Column(db.String(250), nullable=False)
+    # planet = db.relationship("Planet", backref="favorite")
+    # character = db.relationship("Character", backref="favorite")
 
 class Planet(db.Model):
     __tablename__ = 'planet'
@@ -33,7 +33,7 @@ class Planet(db.Model):
     population = db.Column(db.String(250), nullable=False)
     terrain = db.Column(db.String(250), nullable=False)
     favorite_id = db.Column(db.Integer, ForeignKey("favorite.id"))
-    favorite = db.relationship("favorite", back_populates="children")
+    # favorite = db.relationship("favorite", backref="")
 
 class Character(db.Model):
     __tablename__ = 'character'
@@ -43,7 +43,7 @@ class Character(db.Model):
     hair_color = db.Column(db.String(250), nullable= False)
     gender = db.Column(db.String(250), nullable=False)
     favorite_id = db.Column(db.Integer, ForeignKey("favorite.id"))
-    favorite = db.relationship("favorite", back_populates="children")
+    # favorite = db.relationship("favorite", back_populates="children")
 
     def __repr__(self):
         return '<User %r>' % self.username
