@@ -20,7 +20,7 @@ class Favorite(db.Model):
     __tablename__ = 'favorite'
     id = db.Column(db.Integer, primary_key=True)
     planet = db.Column(db.Integer, ForeignKey("planet.id"), db.String(250), nullable=False)
-    character = db.Column(db.Integer, ForeignKey("planet.id"), db.String(250), nullable=False)
+    character = db.Column(db.Integer, ForeignKey("character.id"), db.String(250), nullable=False)
     user_id = db.Column(db.Integer, ForeignKey("user.id"))
     # planet = db.relationship("Planet", backref="favorite")
     # character = db.relationship("Character", backref="favorite")
