@@ -35,6 +35,14 @@ class Planet(db.Model):
     favorite_id = db.Column(db.Integer, ForeignKey("favorite.id"))
     # favorite = db.relationship("favorite", backref="")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            # "": self.gender
+            # do not serialize the password, its a security breach
+        }
+
 class Character(db.Model):
     __tablename__ = 'character'
     id = db.Column(db.Integer, primary_key=True)
@@ -45,12 +53,13 @@ class Character(db.Model):
     favorite_id = db.Column(db.Integer, ForeignKey("favorite.id"))
     # favorite = db.relationship("favorite", back_populates="children")
 
-    def __repr__(self):
-        return '<User %r>' % self.username
+    # def __repr__(self):
+    #     return '<User %r>' % self.username
 
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.email,
+            "name": self.name,
+            "gender": self.gender
             # do not serialize the password, its a security breach
         }
