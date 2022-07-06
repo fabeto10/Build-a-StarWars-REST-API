@@ -14,7 +14,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-    favorite = db.relationship("Favorite", backref="user")
+    favorites = relationship("Favorite", back_populates="user")
 
 class Favorite(db.Model):
     __tablename__ = 'favorite'
@@ -22,8 +22,10 @@ class Favorite(db.Model):
     planet = db.Column(db.String(250), nullable=False)
     character = db.Column(db.String(250), nullable=False)
     user_id = db.Column(db.Integer, ForeignKey("user.id"))
-    planet = db.relationship("Planet", backref="favorite")
-    character = db.relationship("Character", backref="favorite")
+    planet_id = Column(Integer, ForeignKey("planet.id"))
+    planet =relationship("Planet", back_populates="favorites")
+    character_id = Column(Integer, ForeignKey("character.id"))
+    character = relationship("Character", back_populates="favorites")
 
 class Planet(db.Model):
     __tablename__ = 'planet'
@@ -32,8 +34,7 @@ class Planet(db.Model):
     rotation_period = db.Column(db.String(250), nullable=False)
     population = db.Column(db.String(250), nullable=False)
     terrain = db.Column(db.String(250), nullable=False)
-    favorite_id = db.Column(db.Integer, ForeignKey("favorite.id"))
-    # favorite = db.relationship("favorite", backref="")
+    favorites = relationship("Favorite", back_populates="planet")
 
     def serialize(self):
         return {
@@ -50,8 +51,7 @@ class Character(db.Model):
     height = db.Column(db.String(250), nullable=False)
     hair_color = db.Column(db.String(250), nullable= False)
     gender = db.Column(db.String(250), nullable=False)
-    favorite_id = db.Column(db.Integer, ForeignKey("favorite.id"))
-    # favorite = db.relationship("favorite", back_populates="children")
+    favorites = relationship("Favorite", back_populates="character")
 
     # def __repr__(self):
     #     return '<User %r>' % self.username

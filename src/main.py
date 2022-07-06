@@ -62,10 +62,12 @@ def list_user_blog(user_id):
     user_dictionary = list((map(lambda user: user.serialize(), users)))
     return jsonify(user_dictionary)
 
-@app.route('/users/favorites', methods=['GET'])
+@app.route('/users/favorites/<int:planet_id>', methods=['GET'])
 def list_favorite_user_planet(planet_id):
     user_favorite_list_planet = User.query.filter_by(planet_id).one_or_none()
     return serialize(user_favorite_list_planet), 200
+
+@app.route('/users/favorites/<int:people_id>', methods=['GET'])
 def list_favorite_user_people(people_id):
     user_favorite_list_people = User.query.filter_by(people_id).one_or_none()
     return serialize(user_favorite_list_people), 200
