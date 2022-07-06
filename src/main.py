@@ -20,8 +20,6 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
-favorite_list = []
-
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -57,12 +55,12 @@ def list_single_planet(planet_id):
     return jsonify(planet.serialize())
 
 @app.route('/users', methods=['GET'])
-def list_user_blog(user_id):
+def list_user_blog():
     users = User.query.all()
     user_dictionary = list((map(lambda user: user.serialize(), users)))
     return jsonify(user_dictionary)
 
-@app.route('/users/favorites/<int:planet_id>', methods=['GET'])
+@app.route('/users/favorite-planets/<int:planet_id>', methods=['GET'])
 def list_favorite_user_planet(planet_id):
     user_favorite_list_planet = User.query.filter_by(planet_id).one_or_none()
     return serialize(user_favorite_list_planet), 200
@@ -78,11 +76,15 @@ def add_favorite_planet(planet_id):
     favorite_list.append(planet_id)
     return jsonify(favorite_list), 200
 
-@app.route('/users/favorites/people/<int:people_id>', methods=['POST'])
-def add_favorite_people(people_id):
-    global favorite_list
-    favorite_list.append(people_id)
-    return jsonify(favorite_list), 200
+@app.route('/favorites', methods=['POST'])
+def add_favorite():
+    body = request.json
+    favorite = Favorite(
+        user_id = body["user_id"],
+        planet_id = body["planet_id"] if "planet_id" in body else None,
+        character_id = body["character_id"] if "character_id" in body else None
+    )
+    return jsonify(favorite.serialize()), 200
 
 @app.route('/users/favorites/people/<int:people_id>', methods=['DELETE'])
 def delete_favorite_people(people_id):
