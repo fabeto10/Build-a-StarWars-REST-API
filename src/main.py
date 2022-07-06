@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, json
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -20,6 +20,8 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
+favorite_list = []
+
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -35,9 +37,9 @@ def list_people():
     ))
     return jsonify(people_dictionary)
 
-@app.route('/people/<int:character_id>', methods=["GET"])
-def list_single_character(character_id):
-    character = Character.query.filter_by(id=character_id).one_or_none()
+@app.route('/people/<int:people_id>', methods=["GET"])
+def list_single_people(people_id):
+    character = Character.query.filter_by(id=people_id).one_or_none()
     return jsonify(character.serialize())
 
 @app.route('/planet', methods=['GET'])
@@ -48,6 +50,61 @@ def list_planets():
         planets
     ))
     return jsonify(planets_dictionary)
+
+@app.route('/planet/<int:planet_id>', methods=["GET"])
+def list_single_planet(planet_id):
+    planet = Planet.query.filter_by(id=planet_id).one_or_none()
+    return jsonify(planet.serialize())
+
+@app.route('/users', methods=['GET'])
+def list_user_blog(user_id):
+    users = User.query.all()
+    user_dictionary = list()(map(lambda user: user.serialize(), users))
+    return jsonify(user_dictionary)
+
+@app.route('/users/favorites', methods=['GET'])
+def list_favorite_user_planet(planet_id):
+    user_favorite_list_planet = User.query.filter_by(id=planet_id).one_or_none()
+    return serialize(user_favorite_list_planet)
+def list_favorite_user_people(people_id):
+    user_favorite_list_people = User.query.filter_by(id=people_id).one_or_none()
+    return serialize(user_favorite_list_people)
+
+@app.route('/favorites/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_planet():
+    global favorite_list
+    request_body = json.loads(request.data)
+    favorite_list.append(request_body)
+    print("in coming request with the favorite list", request_body)
+    return jsonify(favorite_list), 200
+
+@app.route('/favorites/people/<int:people_id>', methods=['POST'])
+def add_favorite_people():
+    global favorite_list
+    request_body = json.loads(request.data)
+    favorite_list.append(request_body)
+    print("in coming request for the favorite list", request_body)
+    return jsonify(favorite_list), 200
+
+@app.route('/favorites/people/<int:people_id>', methods=['DELETE'])
+def delete_favorite_people(people_id):
+    aux = []
+    global favorite_list
+    for i in range(len(favorite_list)):
+        if people_id != i:
+            aux.append(favorite_list[i])
+    favorite_list = aux
+    return jsonify(favorite_list)
+
+@app.route('/favorites/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(planet_id):
+    aux = []
+    global favorite_list
+    for i in range(len(favorite_list)):
+        if planet_id != i:
+            aux.append(favorite_list[i])
+    favorite_list = aux
+    return jsonify(favorite_list)
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
