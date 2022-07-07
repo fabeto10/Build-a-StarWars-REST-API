@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet, Favorite
+from models import db, User, Character, Planet, FavoritePlanet, FavoriteCharacter
 #from models import Person
 
 app = Flask(__name__)
@@ -62,13 +62,31 @@ def list_user_blog():
 
 @app.route('/users/favorite/planet/<int:planet_id>', methods=['GET'])
 def list_favorite_user_planet(planet_id):
-    user_favorite_list_planet = User.query.filter_by(id=planet_id).one_or_none()
-    return user_favorite_list_planet.serialize(), 200
+    user_favorite_list_planet = FavoritePlanet.query.filter_by(planet_id=planet_id).one_or_none()
+    return serialize(user_favorite_list_planet), 200
+
+@app.route('/users/favorite/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_user_planet():
+    data = request.json
+    planet_id=data.planet_id
+    user_id=data.user_id
+    newFavoritePlanet = FavoritePlanet(user_id, planet_id)
+    return serialize(user_favorite_list_planet), 200
 
 @app.route('/users/favorites/people/<int:people_id>', methods=['GET'])
 def list_favorite_user_people(people_id):
-    user_favorite_list_people = User.query.filter_by(id=people_id).one_or_none()
-    return user_favorite_list_people.serialize(), 200
+
+    user_favorite_list_people = FavoriteCharacter.query.filter_by(character_id=character_id).one_or_none()
+    return serialize(user_favorite_list_people), 200
+
+@app.route('/users/favorites/people/<int:people_id>', methods=['POST'])
+def add_favorite_user_people():
+    data = request.json
+    character_id=data.character_id
+    user_id=data.user_id
+    newFavoriteCharacter = FavoriteCharacter(user_id, character_id)
+    return serialize(newFavoriteCharacter), 200
+
 
 # @app.route('/users/favorites/planet/<int:planet_id>', methods=['POST'])
 # def add_favorite_planet(planet_id):
