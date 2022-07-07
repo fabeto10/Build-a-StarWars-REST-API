@@ -60,26 +60,26 @@ def list_user_blog():
     user_dictionary = list((map(lambda user: user.serialize(), users)))
     return jsonify(user_dictionary)
 
-@app.route('/users/favorite-planets/<int:planet_id>', methods=['GET'])
+@app.route('/users/favorite_planets/<int:planet_id>', methods=['GET'])
 def list_favorite_user_planet(planet_id):
     user_favorite_list_planet = User.query.filter_by(planet_id).one_or_none()
     return serialize(user_favorite_list_planet), 200
 
-@app.route('/users/favorites/<int:people_id>', methods=['GET'])
+@app.route('/users/favorites_people/<int:people_id>', methods=['GET'])
 def list_favorite_user_people(people_id):
     user_favorite_list_people = User.query.filter_by(people_id).one_or_none()
     return serialize(user_favorite_list_people), 200
 
-@app.route('/users/favorites/planet/<int:planet_id>', methods=['POST'])
+@app.route('/users/favorites_planet/<int:planet_id>', methods=['POST'])
 def add_favorite_planet(planet_id):
     global favorite_list
     favorite_list.append(planet_id)
     return jsonify(favorite_list), 200
 
-@app.route('/favorites', methods=['POST'])
+@app.route('/favorites_planet', methods=['POST'])
 def add_favorite():
     body = request.json
-    favorite = Favorite(
+    favorite = Favorite_planet(
         user_id = body["user_id"],
         planet_id = body["planet_id"] if "planet_id" in body else None,
         character_id = body["character_id"] if "character_id" in body else None
