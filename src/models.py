@@ -17,6 +17,14 @@ class User(db.Model):
     favorite_planet = db.relationship("FavoritePlanet", back_populates="user")
     favorite_character = db.relationship("FavoriteCharacter", back_populates="user")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "email":self.email,
+            "password":self.password,
+            "is_active":self.is_active
+        }
+
 class FavoritePlanet(db.Model):
     __tablename__ = 'favorite_planet'
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +80,9 @@ class Planet(db.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "rotation_period": self.rotation_period,
+            "population":self.population,
+            "terrain":self.terrain
         }
 
 class Character(db.Model):
@@ -90,5 +101,7 @@ class Character(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "gender": self.gender
+            "gender": self.gender,
+            "height":self.height,
+            "hair_color":self.hair_color
         }
