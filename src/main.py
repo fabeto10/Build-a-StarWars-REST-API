@@ -27,6 +27,10 @@ def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 # generate sitemap with all your endpoints
+@app.route('/')
+def sitemap():
+    return generate_sitemap(app)
+
 @app.route('/people', methods=["GET"])
 def list_people():
     people = Character.query.all()
@@ -66,30 +70,38 @@ def get_favorites():
     characters = FavoriteCharacter.query.all()
     planets = FavoritePlanet.query.all()
     favorites_characters = list(map(
-        lambda favorite_character: characters.serialize(),
+        lambda favorite_character: favorite_character.serialize(),
         characters
     ))
     favorites_planets = list(map(
-        lambda favorite_planets: planets.serialize(),
+        lambda favorite_planets: favorite_planets.serialize(),
         planets
     ))
-    favorites = favorites_character + favorites_planets
+    favorites = favorites_characters + favorites_planets
 
     return jsonify(favorites), 200
 
-@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+@app.route('/users/favorite/planet/<int:planet_id>', methods=['POST'])
 def add_favorite_user_planet(planet_id):
-    planet_id=data.planet_id
-    user_id=data.user_id
-    newFavoritePlanet = FavoritePlanet(user_id=data["user_id"], planet_id=data["planet_id"])
-    return newFavoritePlanet, 200
+    body = request.json
+    favorite = FavoritePlanet(
+            user_id = body["users_id"] if "users_id" in body else None, 
+            planet_id = body["planet_id"] if "planet_id" in body else None
+        )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
 
-@app.route('/favorite/people/<int:people_id>', methods=['POST'])
+@app.route('/users/favorite/people/<int:people_id>', methods=['POST'])
 def add_favorite_user_character(people_id):
-    people_id=data.people_id
-    user_id=data.user_id
-    newFavoritePeople = FavoriteCharacter(user_id=data["user_id"], character_id=data['people_id'])
-    return newFavoritePeople, 200
+    body = request.json
+    favorite = FavoriteCharacter(
+        user_id= body["user_id"] if "user_id" in body else None,
+        character_id= body["charcater_id"] if "charcater_id" in body else None
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
 
 @app.route('/favorite/people/<int:people_id>', methods=['DELETE'])
 def delete_favorite_people(people_id):
