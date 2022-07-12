@@ -113,44 +113,33 @@ def delete_favorite_planet(planet_id):
     result = FavoritePlanet.query.filter(FavoritePlanet.planet_id == planet_id).delete()
     return jsonify(result), 200
 
-
-# def delete_favorite_people(people_id):
-#     aux = []
-#     global favorite_people
-#     for i in range(len(favorite_people)):
-#         if people_id != i:
-#             aux.append(favorite_people[i])
-#     favorite_people = aux
-#     return jsonify(favorite_people), 200
-
-
-# @app.route('/llenarbd', methods='POST')
-# def llenarbd():
-#     r_body = request.json
-#     response = request.get(f"https://www.swapi.tech/api/people?page=1&limit={r_body['limit']}")
-#     body =request.json()
-#     characters = body["results"]
-#     new = 0
-#     for character in characters:
-#         exist = Character.query.filter_by(name=character['name']).one_or_none() 
-#         if exist: continue
-#         _response = request.get(f"https://www.swapi.tech/api/people/{character['uid']}")
-#         _body = _response.json()
-#         properties = _body['result']['properties']
-#         _character = Character( 
-#             name=properties['name'], 
-#             hair_color=properties['hair_color'], 
-#             gender=properties['gender'], 
-#             height=properties['height']
-#                     )
-#         new += 1
-#         db.session.add(_character)
-#     try:
-#         db.session.commit()
-#         return jsonify(f"added {new} characters"),200
-#     except Exception as error:
-#         db.session.rollback()
-#     return jsonify(f"{error.args}"), 400
+@app.route('/llenarbd', methods=['POST'])
+def llenarbd():
+    r_body = request.json
+    response = requests.get(f"https://www.swapi.tech/api/people?page=1&limit={r_body['limit']}")
+    body = response.json()
+    characters = body['results']
+    new=0
+    for character in characters:
+        exist = Character.query.filter_by(name=character['name']).one_or_none()
+        if exist: continue
+        _response = requests.get(f"https://www.swapi.tech/api/people/{character['uid']}")
+        _body = _response.json()
+        properties = _body['result']['properties']
+        _character = Character(
+            name= properties["name"],
+            hair_color= properties["hair_color"], 
+            gender = properties["gender"],
+            height = properties["height"]
+        )
+        new+=1
+        db.session.add(_character)
+    try:
+        db.session.commit()
+        return jsonify(f"added {new} characters"),200
+    except Exception as error:
+        db.session.rollback()
+        return jsonify(f"{error.args}"), 400
 
 
 # this only runs if `$ python src/main.py` is executed
