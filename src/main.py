@@ -21,9 +21,6 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 
-favorite_people = []
-favorite_planet = []
-
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
@@ -55,7 +52,7 @@ def list_planets():
 
 @app.route('/planets/<int:planet_id>', methods=["GET"])
 def list_single_planet(planet_id):
-    planet = Planet.query.filter_by(planet_id).one_or_none()
+    planet = Planet.query.filter_by(id=planet_id).one_or_none()
     return jsonify(planet.serialize())
 
 @app.route('/users', methods=['GET'])
@@ -65,63 +62,34 @@ def list_user_blog():
     return jsonify(user_dictionary)
 
 @app.route('/users/favorites', methods=['GET'])
-def list_favorite_user_planet(planet_id):
-    planets = Planet.query.all()
-    user_favorite_list_planet = list((map(lambda planet_id: planet_id.serialize(),planets)))
-    # user_favorite_list_planet = FavoritePlanet.query.filter_by(planet_id=planet_id).one_or_none()
-    return jsonify(user_favorite_list_planet), 200
+def get_favorites():
+    characters = FavoriteCharacter.query.all()
+    planets = FavoritePlanet.query.all()
+    favorites_characters = list(map(
+        lambda favorite_character: characters.serialize(),
+        characters
+    ))
+    favorites_planets = list(map(
+        lambda favorite_planets: planets.serialize(),
+        planets
+    ))
+    favorites = favorites_character + favorites_planets
+
+    return jsonify(favorites), 200
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
 def add_favorite_user_planet(planet_id):
-    data = request.json
     planet_id=data.planet_id
     user_id=data.user_id
-    newFavoritePlanet = FavoritePlanet(user_id, planet_id)
-    return user_favorite_list_planet, 200
+    newFavoritePlanet = FavoritePlanet(user_id=data["user_id"], planet_id=data["planet_id"])
+    return newFavoritePlanet, 200
 
 @app.route('/favorite/people/<int:people_id>', methods=['POST'])
-def add_favorite_user_planet(people_id):
-    data = request.json
+def add_favorite_user_character(people_id):
     people_id=data.people_id
     user_id=data.user_id
-    newFavoritePlanet = FavoritePlanet(user_id, planet_id)
-    return user_favorite_list_planet, 200
-
-# @app.route('/users/favorite/people/<int:people_id>', methods=['GET'])
-# def list_favorite_user_people(people_id):
-#     people = Character.query.all()
-#     user_favorite_list_people = list((map(lambda people_id: people_id.serialize(), people)))
-#     # user_favorite_list_people = FavoriteCharacter.query.filter_by(character_id=character_id).one_or_none()
-#     return jsonify(user_favorite_list_people), 200
-
-@app.route('/users/favorite/people/<int:people_id>', methods=['POST'])
-def add_favorite_user_people():
-    data = request.json
-    character_id=data.character_id
-    user_id=data.user_id
-    newFavoriteCharacter = FavoriteCharacter(user_id, character_id)
-    return serialize(newFavoriteCharacter), 200
-
-
-# @app.route('/users/favorites/planet/<int:planet_id>', methods=['POST'])
-# def add_favorite_planet(planet_id):
-#     global favorite_list
-#     favorite_list.append(planet_id)
-#     return jsonify(favorite_list), 200
-
-# @app.route('/favorites', methods=['POST'])
-# def add_favorite():
-#     body = request.json
-#     favorite = Favorite_planet(
-#         user_id = body["user_id"],
-#         planet_id = body["planet_id"] if "planet_id" in body else None,
-#         character_id = body["character_id"] if "character_id" in body else None
-#     )
-#     return jsonify(favorite.serialize()), 200
-
-# @app.route('/users/<int:user_id>', methods=['DELETE'])
-# def delete_user(user_id):
-
+    newFavoritePeople = FavoriteCharacter(user_id=data["user_id"], character_id=data['people_id'])
+    return newFavoritePeople, 200
 
 @app.route('/favorite/people/<int:people_id>', methods=['DELETE'])
 def delete_favorite_people(people_id):
@@ -130,7 +98,7 @@ def delete_favorite_people(people_id):
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
 def delete_favorite_planet(planet_id):
-    result = FavoritePlanet.query.filter_by(planet_id=planet_id).delete()
+    result = FavoritePlanet.query.filter(FavoritePlanet.planet_id == planet_id).delete()
     return jsonify(result), 200
 
 

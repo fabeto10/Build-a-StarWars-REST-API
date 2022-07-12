@@ -33,7 +33,7 @@ class FavoritePlanet(db.Model):
     planet_id = db.Column(db.Integer, db.ForeignKey("planet.id"))
     planet = db.relationship("Planet", back_populates="favorite_planet")
     
-    def __init__(self, user_id, planet_id, character_id):
+    def __init__(self, user_id, planet_id):
         self.user_id = user_id
         self.planet_id = planet_id
         db.session.add(self)
@@ -54,7 +54,7 @@ class FavoriteCharacter(db.Model):
     character_id = db.Column(db.Integer, db.ForeignKey("character.id"))
     character = db.relationship("Character", back_populates="favorite_character")
     
-    def __init__(self, user_id, planet_id, character_id):
+    def __init__(self, user_id, character_id):
         self.user_id = user_id
         self.character_id = character_id
         db.session.add(self)
