@@ -1,6 +1,3 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import requests
 import os
 from flask import Flask, request, jsonify, url_for, json
@@ -113,8 +110,8 @@ def delete_favorite_planet(planet_id):
     result = FavoritePlanet.query.filter(FavoritePlanet.planet_id == planet_id).delete()
     return jsonify(result), 200
 
-@app.route('/llenarbd', methods=['POST'])
-def llenarbd():
+@app.route('/import_people', methods=['POST'])
+def import_people():
     r_body = request.json
     response = requests.get(f"https://www.swapi.tech/api/people?page=1&limit={r_body['limit']}")
     body = response.json()
@@ -137,6 +134,34 @@ def llenarbd():
     try:
         db.session.commit()
         return jsonify(f"added {new} characters"),200
+    except Exception as error:
+        db.session.rollback()
+        return jsonify(f"{error.args}"), 400
+
+@app.route('/import_planets', methods=['POST'])
+def import_planets():
+    r_body = request.json
+    response = requests.get(f"https://www.swapi.tech/api/planets?page=1&limit={r_body['limit']}")
+    body = response.json()
+    planets = body['results']
+    new=0
+    for planet in planets:
+        exist = Planet.query.filter_by(name=planet['name']).one_or_none()
+        if exist: continue
+        _response = requests.get(f"https://www.swapi.tech/api/planets/{planet['uid']}")
+        _body = _response.json()
+        properties = _body['result']['properties']
+        _planet = Planet(
+            name= properties["name"],
+            rotation_period= properties["rotation_period"], 
+            population = properties["population"],
+            terrain = properties["terrain"]
+        )
+        new+=1
+        db.session.add(_planet)
+    try:
+        db.session.commit()
+        return jsonify(f"added {new} planet"),200
     except Exception as error:
         db.session.rollback()
         return jsonify(f"{error.args}"), 400
